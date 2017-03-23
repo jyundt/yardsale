@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-light_green.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
 
-
 	
 </head>
 <body>
@@ -67,7 +66,7 @@
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 <script>
 
-	var mymap = L.map('mapid').setView({{highland_park_center}}, 14);
+    var mymap = L.map('mapid').setView({{highland_park_center}}, 14);
 
 	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoianl1bmR0IiwiYSI6ImNqMGc3M2Z1MzAyOWQzMnB1MmJ3YTZqa3cifQ.xcu0DyUJaUf2VIoXvyAyNA', {
 		maxZoom: 18,
@@ -83,35 +82,40 @@
         markers.push(marker_{{loop.index}});
     {%endfor%}
 
-      function onLocationFound(e) {
-         var radius = e.accuracy / 2;
-         var location = e.latlng
-         L.circle(location, radius).addTo(mymap);
-      }
+    function onLocationFound(e) {
+        var radius = e.accuracy / 2;
+        var location = e.latlng
+        L.circle(location, radius).addTo(mymap);
+    }
 
-      function onLocationError(e) {
-         alert(e.message);
-      }
+    function onLocationError(e) {
+        alert(e.message);
+    }
 
-      function markerPopupOnClick(id){
-          for (var i in markers){
-              var markerID = markers[i].options.title;
-              if (markerID == id){
-                  $(".mdl-layout__tab:eq(1) span").click ();
-                  markers[i].openPopup();
-              };
-          }
-      }
+    function markerPopupOnClick(id){
+        for (var i in markers){
+            var markerID = markers[i].options.title;
+            if (markerID == id){
+                $(".mdl-layout__tab:eq(1) span").click ();
+                $("#mapid").height($("main.mdl-layout__content").height()); mymap.invalidateSize();
+                markers[i].openPopup();
+            };
+        }
+    }
 
 
-      mymap.on('locationfound', onLocationFound);
-      mymap.on('locationerror', onLocationError);
+    mymap.on('locationfound', onLocationFound);
+    mymap.on('locationerror', onLocationError);
 
-      mymap.locate({setView: true, maxZoom: 16});
+    mymap.locate({setView: true, maxZoom: 16});
       
-      $("a").click(function(){
-          markerPopupOnClick($(this)[0].id);
-      });
+    $("a").click(function(){
+        markerPopupOnClick($(this)[0].id);
+    });
+
+    $(window).on("resize", function () { $("#mapid").height($("main.mdl-layout__content").height()); mymap.invalidateSize(); }).trigger("resize");
+
+
 
 </script>
    
