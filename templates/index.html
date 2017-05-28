@@ -39,19 +39,21 @@
             <div class="page-content">
             <ul class="mdl-list">
             {%for location in locations%}
-                <li class="mdl-list__item mdl-list__item--three-line">
-                <span class="mdl-list__item-primary-content">
-                <a id="marker_{{loop.index}}" href="#">
-                    <span class="mdl-chip mdl-chip--contact">
-                        <span class="mdl-chip__contact mdl-color--cyan mdl-color-text--white">{{loop.index}}</span>
-                        <span class="mdl-chip__text">{{location.address}}</span>
+                {% if location.lat and location.lon %}
+                    <li class="mdl-list__item mdl-list__item--three-line">
+                    <span class="mdl-list__item-primary-content">
+                    <a id="marker_{{loop.index}}" href="#">
+                        <span class="mdl-chip mdl-chip--contact">
+                            <span class="mdl-chip__contact mdl-color--cyan mdl-color-text--white">{{loop.index}}</span>
+                            <span class="mdl-chip__text">{{location.address}}</span>
+                        </span>
+                    </a>
+                        <span class="mdl-list__item-text-body">
+                            {{location.stuff}}
+                        </span>
                     </span>
-                </a>
-                    <span class="mdl-list__item-text-body">
-                        {{location.stuff}}
-                    </span>
-                </span>
-                </li>
+                    </li>
+                 {%endif%}
              {%endfor%}
              </ul>
              </div>
@@ -81,8 +83,10 @@
 
     var markers = [];
     {%for location in locations%}
-        var marker_{{loop.index}} = L.marker([{{location.lat}}, {{location.lon}}],{title:"marker_{{loop.index}}"}).addTo(mymap).bindPopup('<strong>{{location.address}}</strong><br>{{location.stuff}}');
-        markers.push(marker_{{loop.index}});
+        {% if location.lat and location.lon %}
+            var marker_{{loop.index}} = L.marker([{{location.lat}}, {{location.lon}}],{title:"marker_{{loop.index}}"}).addTo(mymap).bindPopup('<strong>{{location.address}}</strong><br>{{location.stuff}}');
+            markers.push(marker_{{loop.index}});
+        {%endif%}
     {%endfor%}
 
     function onLocationFound(e) {
