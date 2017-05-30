@@ -10,13 +10,33 @@
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
 	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.7/dialog-polyfill.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.cyan-light_green.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.7/dialog-polyfill.min.css" type="text/css">
 
 	
 </head>
 <body>
+    <dialog class="mdl-dialog">
+        <h4 class="mdl-dialog__title">Highland Park Yardsale Map</h4>
+        <div class="mdl-dialog__content">
+            <p><strong>BETA</strong></p>
+            <p>Welcome to the online Highland Park Yard Sale Map for 2017! Don't plan based on this map yet! Address numbers and detailed map locations will be revealed on <strong>June 4th at 9:00 am</strong>.</p>
+            <p>Additionally, this site is still in beta and may have some missing or broken functionality.</p>
+        </div>
+        <div class="mdl-dialog__actions">
+            <button type="button" class="mdl-button close">Show me the listings!</button>
+        </div>
+    </dialog>
+    <script>
+        var dialog = document.querySelector('dialog');
+        dialogPolyfill.registerDialog(dialog);
+        dialog.querySelector('button:not([disabled])').addEventListener('click', function() { dialog.close();});
+        dialog.showModal();
+    </script>
+            
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header
                 mdl-layout--fixed-tabs
                 mdl-layout--no-drawer-button
@@ -24,7 +44,7 @@
 
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row">
-                <span class="mdl-layout-title">The 2017 Highland Park Yard Sale - BETA</span>
+                <span class="mdl-layout-title">The 2017 Highland Park Yard Sale</span>
             </div>
             <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
                 <a href="#list-tab" class="mdl-layout__tab is-active"><strong>List View</strong></a>
@@ -129,6 +149,16 @@
 
 
 
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-100160098-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
 </body>
 </html>
 
