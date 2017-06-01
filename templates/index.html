@@ -62,8 +62,10 @@
             <div class="page-content">
                 <div class="mdl-grid" id="itemList">
                     <div class="mdl-textfield mdl-js-textfield mdl-cell mdl-cell--12-col">
-                        <input class="mdl-textfield__input" type="text" id="searchBox" onkeyup="listSearch()">
-                        <label class="mdl-textfield__label" for="searchBox">Search within listings</label>
+                        <form action="#" onsubmit="hideKeyboard(event)" autocomplete="off">
+                            <input class="mdl-textfield__input" type="text" id="searchBox" onkeyup="listSearch()">
+                            <label class="mdl-textfield__label" for="searchBox">Search within listings</label>
+                        </form>
                     </div>
                 {%for location in locations%}
                     {% if location.lat and location.lon %}
@@ -148,6 +150,11 @@
                 cards[i].style.display = "none";
             }
         }
+    }
+
+    function hideKeyboard(e){
+        e.preventDefault();
+        document.getElementById("searchBox").blur();
     }
 </script>
    
