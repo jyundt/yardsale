@@ -33,13 +33,21 @@ def add_lon_lat(sheet):
     except gspread.exceptions.RequestError:
         sheet = get_worksheet()
         spreadsheet_list = sheet.get_all_values()
+
+    """This is sorta clunky, but gspread can only update cells by position,
+    so we have to get a list of lists and iterate through it.
+    (Instead of returning a list of dicts similar to what we do for mapping.)
+    """
+    address_position = spreadsheet_list[0].index("address")
+    lat_position = spreadsheet_list[0].index("lat")
+    lon_position = spreadsheet_list[0].index("lon")
     for row in range(1,len(spreadsheet_list)):
-        if spreadsheet_list[row][3] is '':
-            geocoder_response = geocoder.forward(spreadsheet_list[row][0],bbox=highland_park_bbox)
+        if spreadsheet_list[row][lat_position] is '':
+            geocoder_response = geocoder.forward(spreadsheet_list[row][address_position],bbox=highland_park_bbox)
             if geocoder_response.geojson()['features']:
                 lon, lat= geocoder_response.geojson()['features'][0]['center']
-                sheet.update_cell(row+1,4, lat)
-                sheet.update_cell(row+1,5, lon)
+                sheet.update_cell(row+1, lat_position+1, lat)
+                sheet.update_cell(row+1, lon_position+1, lon)
     return sheet
 
 def get_all_data(redis_conn):
