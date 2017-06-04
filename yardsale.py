@@ -3,6 +3,7 @@ import gspread
 import redis
 import json
 import time
+import os
 from flask import Flask, render_template
 from flask_script import Manager, Shell
 from oauth2client.service_account import ServiceAccountCredentials
@@ -16,7 +17,7 @@ def get_worksheet():
     scope = ['https://spreadsheets.google.com/feeds']
     creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
     client = gspread.authorize(creds)
-    workbook = client.open_by_key('12OdDOCSp67kNgb1eVVamZJWpZQUcUyVAiZOghMamnJU')
+    workbook = client.open_by_key(spreadsheet_key)
     sheet = workbook.get_worksheet(0)
     return sheet
 
@@ -69,6 +70,7 @@ def make_shell_context():
 manager.add_command("shell", Shell(make_context=make_shell_context))
 highland_park_bbox = 	[-79.936351, 40.464845, -79.908334, 40.484]
 highland_park_center = [-79.9195, 40.4723]
+spreadsheet_key = os.environ.get('SPREADSHEET_KEY')
 geocoder = Geocoder()
 redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0)
 
