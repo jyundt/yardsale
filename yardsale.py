@@ -15,7 +15,7 @@ manager = Manager(app)
 def get_worksheet():
     """Auth to GApps and return a sheet"""
     scope = ['https://spreadsheets.google.com/feeds']
-    creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
+    creds = ServiceAccountCredentials.from_json_keyfile_name(gapps_json_key, scope)
     client = gspread.authorize(creds)
     workbook = client.open_by_key(spreadsheet_key)
     sheet = workbook.get_worksheet(0)
@@ -71,6 +71,7 @@ manager.add_command("shell", Shell(make_context=make_shell_context))
 highland_park_bbox = 	[-79.936351, 40.464845, -79.908334, 40.484]
 highland_park_center = [-79.9195, 40.4723]
 spreadsheet_key = os.environ.get('SPREADSHEET_KEY')
+gapps_json_key = os.environ.get('GAPPS_JSON_KEY')
 geocoder = Geocoder()
 redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0)
 
