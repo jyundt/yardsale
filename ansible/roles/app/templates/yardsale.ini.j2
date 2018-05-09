@@ -1,0 +1,13 @@
+[uwsgi]
+uid = {{yardsale_user}}
+gid = {{yardsale_group}}
+socket = 127.0.0.1:{{app_server_port}}
+master = true
+enable-threads = True
+chdir = {{app_dir}}
+venv = {{venv_dir}}
+module = yardsale:app
+plugin = python
+for-readline = {{yardsale_vars}}
+  env = %(_)
+endfor =

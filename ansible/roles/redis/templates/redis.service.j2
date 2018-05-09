@@ -1,0 +1,15 @@
+[Unit]
+Description=Redis Server
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=on-failure
+RestartSec=10
+ExecStartPre=-/usr/bin/docker kill {{redis_service}}
+ExecStartPre=-/usr/bin/docker rm {{redis_service}}
+ExecStart=/usr/bin/docker run --name {{redis_service}} -p 127.0.0.1:{{redis_port}}:{{redis_port}} {{redis_docker_image}}:{{redis_docker_image_version}}
+ExecStop=/usr/bin/docker stop {{redis_service}}
+
+[Install]
+WantedBy=multi-user.target

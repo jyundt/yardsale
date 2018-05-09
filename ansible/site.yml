@@ -1,0 +1,12 @@
+- name: import OS variables
+  hosts: all
+  roles:
+    - base
+    - docker
+    - redis
+    - app
+    - web
+  tasks:
+    - include_vars: "group_vars/os_{{ansible_os_family}}.yml"
+  handlers:
+    - import_tasks: handlers/main.yml

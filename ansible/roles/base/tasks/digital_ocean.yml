@@ -1,0 +1,39 @@
+---
+- name: Add DigitalOcean do-agent RPM GPG key (RHEL)
+  rpm_key:
+    state: present
+    key: "https://repos.sonar.digitalocean.com/sonar-agent.asc"
+  when: ansible_os_family == "RedHat"
+
+- name: Install DigitalOcean do-agent repo (RHEL)
+  yum_repository:
+    name: "digitalocean-agent"
+    file: "DigitalOcean-Sonar"
+    description: "DigitalOcean agent"
+    baseurl: "https://repos.sonar.digitalocean.com/yum/$basearch"
+    gpgcheck: yes
+    gpgkey: "https://repos.sonar.digitalocean.com/sonar-agent.asc"
+  when: ansible_os_family == "RedHat"
+
+- name: Add DigitalOcean do-agent APT GPG key (Ubuntu)
+  apt_key:
+    state: present
+    url: "https://repos.sonar.digitalocean.com/sonar-agent.asc"
+  when: ansible_os_family == "Debian"
+
+- name: Install DigitalOcean do-agent repo (Ubuntu)
+  apt_repository:
+    repo: "deb https://repos.sonar.digitalocean.com/apt main main"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install DigitalOcean do-agent
+  package: 
+    name: "do-agent"
+    update_cache: yes
+
+- name: Start DigitalOcean do-agent
+  service: 
+    name: do-agent
+    state: started
+    enabled: yes

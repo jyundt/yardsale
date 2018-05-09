@@ -1,0 +1,18 @@
+---
+- name: Update AWS private route53 zone
+  route53:
+    command: create
+    zone: "{{dns_zone}}"
+    record: "{{item.record}}"
+    type: "{{item.type}}"
+    ttl: 300
+    value: "{{item.value}}"
+    wait: yes
+    hosted_zone_id: "{{aws_private_hosted_zone_id}}"
+    aws_access_key: "{{aws_access_key}}"
+    aws_secret_key: "{{aws_secret_key}}"
+    overwrite: true
+    private_zone: true
+  with_items:
+    - { record: "{{inventory_hostname}}", value: "{{ansible_default_ipv4['address']}}", type: 'A'}
+  delegate_to: localhost

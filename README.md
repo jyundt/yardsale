@@ -70,9 +70,15 @@ Note that you will still need to have a local redis instance for this developmen
  ```
  
 ## Deployment
+Instructions are provided for two different deployment models: ansible and "manual mode"
+### Ansible
+Checkout [the ansible readme](ansible/README.md) for instructions on deploying `yardsale` via ansible. The ansible playbook will configure redis/uwsgi/nginx identically to the manual steps listed below.
+
+### Manual
+
 A redis instance, WSGI application server and webserver are required to run the server side components. Any WSGI application server and webserver can be used, but uWSGI and nginx are used below for reference.
  
-### Redis
+#### Redis
 Install and start a redis instance using the appropriate package manager for your server. Or, use a [Docker container](https://hub.docker.com/_/redis/) (probably the easiest method). 
  
 If docker is already configured and running on your server, something like this should work fine:
@@ -83,7 +89,7 @@ docker run -d -p 127.0.0.1:6379:6379 redis:3.2-alpine
  
 Note that `yardsale` assume redis is running on the default port: `6379`.
  
-### uWSGI 
+#### uWSGI
 The following steps can be used to deploy a uWSGI application server, but as previously mentioned, any WSGI compatible server can be used.
  
 Note that it is *highly* suggested to create a non-privileged service account (and group) for running the application server.
@@ -109,11 +115,11 @@ endfor =
  
 Start the uWSGI application server using the appropriate service management tool for your server: systemd, upstart, etc.
  
-### nginx
+#### nginx
  
 These instructions assume you are using uWSGI for the application server, please adjust them accordingly if you are using something else (gunicorn, tornado, etc)
  
-#### SSL/TLS
+##### SSL/TLS
 It is **highly** recommended to secure your webserver with SSL/TLS. The [Let's Encrypt project](https://letsencrypt.org/) offers free SSL certificates if costs are a concern. The documentation below will assume SSL will be enabled and all traffic will be redirected from HTTP (unencrypted) -> HTTPS (encrypted) and that strong encryption will be enabled.
  
 Install nginx using the appropriate package manager for your server.

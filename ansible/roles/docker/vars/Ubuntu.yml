@@ -1,0 +1,15 @@
+---
+docker_os_docker_packages:
+  - docker
+  - docker-engine
+  - docker.io
+docker_deps:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - software-properties-common
+docker_packages:
+  - docker-ce
+  - python3-docker
+docker_apt_key: https://download.docker.com/linux/ubuntu/gpg
+

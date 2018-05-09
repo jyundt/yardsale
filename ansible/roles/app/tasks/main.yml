@@ -1,0 +1,97 @@
+---
+- name: Create application group
+  group:
+    name: "{{yardsale_group}}"
+    gid: "{{yardsale_gid}}"
+
+- name: Create application account
+  user: 
+    name: "{{yardsale_user}}"
+    uid: "{{yardsale_uid}}"
+    group: "{{yardsale_group}}"
+    shell: "{{yardsale_user_shell}}"
+    home: "{{yardsale_homedir}}"
+
+- name: Create ENV var file for application account
+  template: 
+    src: templates/yardsale_vars.j2
+    dest: "{{yardsale_vars}}"
+    mode: 0600
+    owner: "{{yardsale_user}}"
+    group: "{{yardsale_group}}"
+  notify:
+    - Restart app server
+
+- name: Add ENV var file to .bashrc
+  lineinfile:
+    dest: "{{yardsale_homedir}}/.bashrc"
+    line: "export $(cat {{yardsale_vars}} | xargs)"
+    state: present 
+
+- name: Install git client
+  package: 
+    name: git
+    update_cache: yes
+
+- name: Pull code from git
+  git: 
+    repo: "{{git_repo}}"
+    dest: "{{app_dir}}"
+    version: "{{git_branch}}"
+  become: yes
+  become_user: "{{yardsale_user}}"
+  notify: 
+    - Restart app server
+
+- name: Install virtualenv and python deps
+  package: 
+    name: "{{item}}"
+    update_cache: yes
+  with_items: "{{python_app_deps}}"
+
+- name: Upgrade pip version in virtualenv
+  pip:
+    name: pip
+    virtualenv: "{{venv_dir}}"
+    version: "{{pip_version}}"
+    virtualenv_python: "{{python_version}}"
+  become: yes
+  become_user: "{{yardsale_user}}"
+
+- name: Create virtualenv and install pip requirements
+  pip:
+    requirements: "{{app_dir}}/requirements.txt"
+    virtualenv: "{{venv_dir}}"
+    virtualenv_python: "{{python_version}}"
+  become: yes
+  become_user: "{{yardsale_user}}"
+  notify: 
+    - Restart app server
+
+- name: Install Application server binaries
+  package:
+    name: "{{app_server_packages}}"
+    update_cache: yes
+
+- name: Create app server config
+  template: 
+    src: templates/yardsale.ini.j2 
+    dest: "{{app_server_config}}"
+    owner: "{{yardsale_user}}"
+    group: "{{yardsale_group}}"
+  notify: Restart app server
+
+- name: Copy gapps json key
+  copy: 
+    src: "{{ gapps_json_key }}"
+    dest: "{{ app_dir }}/{{gapps_json_key}}"
+    owner: "{{ yardsale_user }}"
+    group: "{{ yardsale_group }}"
+    mode: "0600"
+  notify: Restart app server    
+
+- name: Start/enable app server
+  service:
+    name: "{{app_server}}"
+    state: started
+    enabled: yes

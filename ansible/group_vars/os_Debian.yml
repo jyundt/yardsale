@@ -1,0 +1,13 @@
+---
+ntp_package: "ntp"
+ntp_service: "{{ntp_package}}"
+certbot_package: "certbot"
+python_app_deps:
+  - gcc
+  - python-virtualenv
+  - python-dev
+app_server: "uwsgi"
+app_server_config: "/etc/uwsgi/apps-enabled/yardsale.ini"
+app_server_packages: 
+  - uwsgi
+  - uwsgi-plugin-python

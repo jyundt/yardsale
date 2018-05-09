@@ -1,0 +1,168 @@
+---
+- name: "Include OS specific vars"
+  include_vars: "{{ansible_os_family}}.yml"
+
+- name: Run AWS specific tasks
+  include_tasks: aws.yml
+  when: ansible_product_uuid is search("^EC2") and ansible_system_vendor == "Xen"
+
+- name: Run DigitalOcean specific tasks
+  include_tasks: digital_ocean.yml
+  when: ansible_system_vendor == "DigitalOcean"
+
+- name: Upgrade all packages (RHEL)
+  yum: 
+    name: "*"
+    state: latest 
+    update_cache: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Upgrade all packages (Ubuntu)
+  apt:
+    upgrade: dist
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install ntp
+  package:
+    name: "{{ntp_package}}"
+    update_cache: yes
+
+- name: Enable ntp
+  service:
+    name: "{{ntp_service}}"
+    state: started
+    enabled: True
+
+- name: Install SELinux deps (RHEL)
+  yum: 
+    name: "{{item}}"
+    update_cache: yes
+  with_items:
+  - libsemanage-python
+  - libselinux-python
+  when: ansible_os_family == "RedHat"
+
+- name: Disable password based root access
+  lineinfile: 
+    dest: /etc/ssh/sshd_config
+    line: "PermitRootLogin without-password"
+    state: present
+    regexp: "^PermitRootLogin"
+  notify: Restart sshd
+
+- name: Enable SELinux (RHEL)
+  selinux: 
+    policy: targeted
+    state: enforcing
+  when: ansible_os_family == "RedHat"
+
+- name: Remove ufw (Ubuntu)
+  apt:
+    name: ufw
+    state: absent
+    purge: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install firewalld
+  package:
+    name: firewalld
+
+- name: Enable firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: True
+
+- name: Open firewalld for certbot
+  firewalld: 
+    service: "{{ item }}"
+    state: enabled
+    permanent: True
+    immediate: True
+  loop:
+    - http
+    - https
+
+- name: Install EPEL (RHEL)
+  yum: 
+    name: "{{epel_repo_rpm}}"
+  when: ansible_os_family == "RedHat"
+
+- name: Install certbot PPA (Ubuntu)
+  apt_repository:
+    repo: "ppa:certbot/certbot"
+  when: ansible_os_family == "Debian"
+
+- name: Install certbot
+  package:
+    name: "{{certbot_package}}"
+    update_cache: yes
+
+- name: Generate certbot cert
+  command: "{{certbot_package}} certonly -n --keep --standalone -d {{inventory_hostname}}  --agree-tos --email {{certbot_username}}"
+  args:
+    creates: "/etc/letsencrypt/live/{{inventory_hostname}}"
+
+- name: Create certbot hooks dir
+  file: 
+    path: /etc/letsencrypt/hooks
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Install certbot cronjob
+  cron:
+    name: "certbot cert renewal"
+    special_time: daily
+    cron_file: certbot
+    user: root
+    state: present
+    job: "/usr/bin/{{certbot_package}} renew -n --keep --standalone --pre-hook /etc/letsencrypt/hooks/pre.sh --post-hook /etc/letsencrypt/hooks/post.sh"
+
+- name: Install sysstat
+  package: 
+    name: sysstat
+    update_cache: yes
+
+- name: Enable sysstat
+  service:
+    name: sysstat
+    state: started
+    enabled: yes
+
+- name: Check for an active swapfile
+  command: grep "^/swapfile" /proc/swaps
+  register: swapfile_result
+  ignore_errors: true
+  changed_when: False
+
+- name: Create swap file
+  command: dd if=/dev/zero of=/swapfile bs=1M count=2048
+  when: swapfile_result.rc != 0
+
+- name: Format swap file
+  command: mkswap /swapfile
+  when: swapfile_result.rc != 0
+
+- name: Change perms on swap file
+  file: 
+    path: /swapfile
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Swapon swap file
+  command: swapon /swapfile
+  when: swapfile_result.rc != 0
+
+- name: Update fstab with swap file
+  mount: 
+    name: none
+    src: /swapfile
+    fstype: swap 
+    opts: sw 
+    passno: 0 
+    dump: 0
+    state: present
